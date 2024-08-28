@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "buildgram": "npx peggy --format es --output scripts/grammar/parser.js assets/grammar/gram.pegjs"
+    }
+}

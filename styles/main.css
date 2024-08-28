@@ -1,0 +1,203 @@
+html {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background-color: #333;
+}
+
+#ide {
+    display: flex;
+    padding: 10px;
+    background-color: #555555;
+    height: 50vh;
+}
+
+#consoleContainer {
+    padding: 10px;
+    background-color: #666;
+    height: 25vh;
+    display: flex;
+}
+
+#btnContainer {
+    margin-left: 2vw;
+    display: flex;
+}
+
+#toolbar {
+    height: 10vh;
+    background-color: darkslategrey;
+    width: 100%;
+    align-content: center;
+    margin-top: -10px;
+}
+
+.btnToolbar {
+    border: 1px solid transparent;
+    margin-right: 1vw;
+    width: 10vw;
+    height: 6vh;
+    text-align: center;
+    align-content: center;
+    text-decoration: none;
+    color: white;
+    background-color: #8888881c;
+    font-size: 2vh;
+
+    &:hover {
+        border: 1px solid white;
+    }
+}
+
+#lines {
+    width: 50px;
+    resize: none;
+    background-color: #f0f0f0;
+    font-family: 'Courier New', Courier, monospace;
+    color: #555555;
+    text-align: right;
+    padding-right: 5px;
+    border-right: 1px solid #ccc;
+    overflow: hidden;
+}
+
+#code {
+    background-color: #99999961;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding-left: 5px;
+    outline: none;
+    word-wrap: normal;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+#console {
+    background-color: #99999961;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    width: 100%;
+    height: calc(100% - 3vh);
+    resize: none;
+    border: none;
+    outline: none;
+}
+
+#cursorPos {
+    margin-bottom: 5px;
+    padding-left: 10px;
+    height: 4vh;
+    background-color: #555555;
+    color: #fff;
+    font-family: monospace;
+}
+
+/* Archivos cargados */
+#tabsContainer {
+    display: flex;
+    background-color: #444;
+    border-bottom: 1px solid #ccc;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 30px;
+    background-color: #555;
+    color: white;
+    margin-right: 5px;
+    padding: 5px;
+    box-sizing: border-box;
+    position: relative;
+    cursor: pointer;
+}
+
+.tab.active {
+    background-color: #333;
+    border-bottom: 2px solid #f00;
+}
+
+.tab .close {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #f00;
+    font-size: 16px;
+}
+
+.tab.unsaved::after {
+    content: '*';
+    position: absolute;
+    right: 25px;
+    top: 5px;
+    color: #f00;
+    font-weight: bold;
+}
+
+/* Aplica a los textarea */
+textarea::-webkit-scrollbar {
+    width: 12px;
+    /* Ancho de la barra de desplazamiento vertical */
+    height: 12px;
+    /* Altura de la barra de desplazamiento horizontal */
+}
+
+textarea::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    /* Fondo del track (pista) de la barra de desplazamiento */
+}
+
+textarea::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Color del pulgar (thumb) de la barra de desplazamiento */
+    border-radius: 6px;
+    /* Bordes redondeados del pulgar */
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Color del pulgar al pasar el ratón por encima */
+}
+
+/* Aplica a los textarea */
+textarea {
+    scrollbar-width: thin;
+    /* Ancho de la barra de desplazamiento (auto, thin, none) */
+    scrollbar-color: #888 #f0f0f0;
+    /* Color del pulgar y del track respectivamente */
+}
+
+/* Personalización avanzada */
+textarea::-moz-scrollbar {
+    width: 12px;
+    /* Ancho de la barra de desplazamiento vertical */
+    height: 12px;
+    /* Altura de la barra de desplazamiento horizontal */
+}
+
+textarea::-moz-scrollbar-track {
+    background: #f0f0f0;
+    /* Fondo del track de la barra de desplazamiento */
+}
+
+textarea::-moz-scrollbar-thumb {
+    background: #888;
+    /* Color del pulgar de la barra de desplazamiento */
+    border-radius: 6px;
+    /* Bordes redondeados del pulgar */
+}
+
+textarea::-moz-scrollbar-thumb:hover {
+    background: #555;
+    /* Color del pulgar al pasar el ratón por encima */
+}
