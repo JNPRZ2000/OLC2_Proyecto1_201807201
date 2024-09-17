@@ -4,7 +4,16 @@ Program
     }
 
 Instructions
-    = _ dec:Declaration _ {
+    = _ std: StructDeclaration _ {
+        return { type: "INS_STD", value: std };
+    }
+    / _ decm:MatrixDeclaration _ {
+        return { type: "INS_MDEC", value: decm };
+    }
+    / _ deca:ArrayDeclaration _ {
+        return { type: "INS_ADEC", value: deca };
+    }
+    / _ dec:Declaration _ {
         return { type: "INS_DEC", value: dec };
     }
     / _ b:INSBREAK _ {
@@ -15,6 +24,12 @@ Instructions
     }
     / _ r:INSRETURN _ {
         return { type: "INS_RETURN", value: r };
+    }
+    / _ i:AdditionAssign _ {
+        return { type: "INS_INCREMENT", value: i };
+    }
+    / _ d:SubsAssign _ {
+        return { type: "INS_DECREMENT", value: d };
     }
     / _ fr:INSFOR _ {
         return { type: "INS_FOR", value: fr };
@@ -47,6 +62,11 @@ VAR = "var" { return text(); }
 NULL = "null" { return null; }
 FOR = "for" { return text(); }
 PARSEINT = "parseInt" { return text(); }
+PARSEFLOAT = "parsefloat" { return text(); }
+TOSTRING = "toString" { return text(); }
+TOLOWERCASE = "toLowerCase" { return text(); }
+TOUPPERCASE = "toUperCase" { return text(); }
+TYPEOF = "typeof" { return  text(); }
 IF = "if" { return text(); }
 ELSE = "else" { return text(); }
 SWITCH = "switch" { return text(); }
@@ -56,6 +76,16 @@ DEFAULT = "default" { return text(); }
 CONTINUE = "continue" { return text(); }
 RETURN = "return" { return text(); }
 WHILE = "while" { return text(); }
+NEW = "new" { return text(); }
+INDEXOF = "indexOf" { return text(); }
+JOIN = "join" { return text(); }
+LENGTH = "length" { return text(); }
+VOID = "void" { return text(); }
+STRUCT = "struct" { return text(); }
+FUNCTION = "function" { return text(); }
+KEYS = "keys" { return text(); }
+OBJECT = "Object" { return text(); }
+
 //INSTRUCCIONES
     //EMBEBIDAS
 SOUT
@@ -222,6 +252,7 @@ UnaryExpression
     }
     / Value
 
+//
 Declaration
     = d: VarDeclaration{
         return { type: "DECLARATION", value: d };
@@ -233,10 +264,37 @@ Declaration
         return { type: "DECLARATION", value: d };
     }
 
+StructDeclaration
+    = STRUCT _ i: Id _"{"_ d:Declaration+ _ "}"{
+        return { type: "STRUCT", value: { ATTRS: d } };
+    }
+ 
+MatrixDeclaration
+    = d:DATATYPE _ "["_"]"_"["_"]"_ i:Id _ "=" _ NEW _ d2:DATATYPE _"["_ w:Expression _"]" _ "["_ h:Expression _"]"_";"{
+        return { type: "Matrix Declaration", value: {DT1:d, DT2: d2, ID:i, WIDH: w, HEIGHT: h } };
+    }
+    / d:DATATYPE _ "[" _ "]" _ "[" _ "]" _ i:Id _ "=" _ "{" _ firstRow:MatrixRow otherRows:(_"," _ MatrixRow)* _ "}" _ ";" {
+        return { type: "MATRIX_DECLARATION", value: { DT: d, ID: i, Rows: [firstRow].concat(otherRows.map(element => element[3]))/*[firstRow].concat(otherRows)*/ } };
+    }
+MatrixRow
+    = "{" _ e:Expression e2:(_"," _ Expression)* _ "}" {
+        return { type: "MATRIX_ROW", values: [e].concat(e2.map(element => element[3])) };
+    }
+ArrayDeclaration
+    = d:DATATYPE _ "["_"]"_ i:Id _ "=" _ NEW _ d2:DATATYPE _ "[" _ l:Expression _ "]" _ ";" {
+        return { type: "Array DECLARATION", value: { DTA: d, DTB: d2, ID: i, Length: l } };
+    }
+    / d:DATATYPE _ "[" _ "]" _ i:Id _ "=" _ "{" _ e:Expression e2:(_ "," _ Expression)* _ "}" _ ";" {
+        return { type: "ARRAY_DECLARATION2", value: { DT: d, ID: i, Values: [e].concat(e2.map(element => element[3])) } };
+    }
+    / d: DATATYPE _ "[" _ "]" _ i:Id _ "=" _ i2:Id _ ";"{
+        return { type: "ARRAY_DECLARATION3", value: { DT: d, ID: i, Value: i2 } };
+    }
 VarDeclaration
     = VAR _ id: Id _ "=" _ expr: Expression _ ";"{
         return { type:"VAR_DEC", value: { TYPE: "var", ID: id, EXPR: expr } };
     }
+
 
 TypedDeclaration
     = type: DATATYPE _ id: Id _ "=" _ expr: Expression _ ";" {
@@ -246,34 +304,40 @@ TypedDeclaration
         return { type: "TYPE_DEC", value: { TYPE: type, ID: id, EXPR: null } };
     }
 
+
 Assignament
     = id:Id _ "=" _ expr: Expression _ ";"{
         return { type: "ASSIGN", value: { ID: id, EXPR: expr } };
     }
+
 
 AdditionAssign
     = inc: Increment _ ";"{
         return { type: "ADDITION_ASSIGN", value: inc };
     }
 
+
 SubsAssign
     = dec: Decrement _ ";"{
         return { type: "SUSB_ASSIGN", value: dec };
     }
+
 Increment
     = id:Id _ "+=" _ expr:Expression{
         return { type: "INCREMENT_A", value: { ID: id, expr: expr } };
     }
-    / id:Id p:"++"{
+    / id:Id _ p:"++"{
         return { type: "INCREMENT_B", value: {  ID: id, expr: p } };
     }
+
 Decrement
     = id:Id _ "-=" _ expr:Expression{
         return { type: "DECREMENT_A", value: { ID: id, expr: expr } };
     }
-    / id:Id p:"--"{
+    / id:Id _ p:"--"{
         return { type: "DECREMENT_B", value: {  ID: id, expr: p } };
     }
+
 
 Value
     = "(" _ v: Expression _ ")" { return v; }
@@ -284,15 +348,18 @@ Value
     / _ v: NULL _ { return v; }
     / _ v: Id _ { return v; }
 
+
 StrVal
     = "\"" val: [^\"]* "\"" {
         return val.join("");
     }
 
+
 CharVal
     = "'" val: [^'] "'" {
         return val;
     }
+
 
 NumVal
     = ([0-9]+('.'[0-9]+)?) {
@@ -302,19 +369,26 @@ NumVal
         return parseInt(text());
     }
 
+
 BoolVal
     = v: (TRUE / FALSE){
         return v;
     }
+
 
 Id
     = !Reserved [a-zA-Z_][a-zA-Z0-9_]* {
         return { type: "ID", value: text() };
     }
 
+
 Reserved
     = BoolVal
-    / DATATYPE
+    / INT
+    / CHAR
+    / FLOAT
+    / STRING
+    / BOOLEAN
     / FOR
     / NULL
     / IF
@@ -326,14 +400,34 @@ Reserved
     / CONTINUE
     / RETURN
     / WHILE
+    / NEW
+    / INDEXOF
+    / JOIN
+    / LENGTH
+    / STRUCT
+    / OBJECT
+    / KEYS
+    / TYPEOF
+    / VOID
+    / PARSEINT
+    / PARSEFLOAT
+    / TOSTRING
+    / TOLOWERCASE
+    / TOUPPERCASE
+    / TYPEOF
+
+
 
 // PRODUCCIONES AUXILIARES
+
 DATATYPE
     = v: INT { return v; }
     / v: FLOAT { return v; }
     / v: STRING { return v; }
     / v: BOOLEAN { return v; }
     / v: CHAR { return v; }
+    / v: Id { return v; }
+
 
 // Manejo de espacios en blanco y comentarios
 _

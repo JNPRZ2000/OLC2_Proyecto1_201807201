@@ -1,4 +1,6 @@
 import { parse, StartRules } from "../scripts/grammar/parser.js";
+import SymbolTable from "./compiler/symbol/SymbolTable.js";
+import Visitor from "./compiler/Visitor.js";
 document.getElementById('btnRun').addEventListener('click', () => {
     const currentDate = new Date();
     // Obtener componentes de la fecha y hora
@@ -13,11 +15,21 @@ document.getElementById('btnRun').addEventListener('click', () => {
     document.getElementById('console').value = formattedDate + "\n";
     const code = document.getElementById('code').value;
     try {
-        const tree = parse(code.trim(), {
+        const st = new SymbolTable();
+        const visitor = new Visitor(st);
+        const ast = parse(code.trim());
+        visitor.visit(ast);
+        
+        /*const tree = parse(code.trim(), {
             StartRules: ["Program"]
         });
-        document.getElementById('console').value += `${JSON.stringify(tree, null, 2)}`;
-
+        const st = new SymbolTable();
+        const visitor = new Visitor(st);
+        tree.forEach(statement =>{
+            console.log(statement);
+            visitor.visit(statement);
+        })*/
+        //document.getElementById('console').value += `${JSON.stringify(tree, null)}`;
     } catch (e) {
         const location = e.location || {};
         const line = location.start?.line || 'unknown';
@@ -29,6 +41,7 @@ document.getElementById('btnRun').addEventListener('click', () => {
         err += `\tCause: ${code.split('\n')[line - 1]?.[column - 1] || 'unknown'}\n`;
         err += `\tContext: ${code.split('\n')[line - 1]}\n}`;
         document.getElementById("console").value += err;
+        console.error("Error cmd",e);
     }
 });
 

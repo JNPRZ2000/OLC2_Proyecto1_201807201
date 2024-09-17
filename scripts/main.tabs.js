@@ -109,7 +109,7 @@ function closeTab(fileName) {
 
     delete files[fileName];
 
-    // Encuentra la pestaña correspondiente y elimínala
+    // Encuentra la pestaña correspondiente y la elimina
     const tabToRemove = document.querySelector(`.tab[data-file-name='${fileName}']`);
     if (tabToRemove) {
         tabToRemove.remove();
@@ -161,17 +161,11 @@ function saveCurrentFile() {
 
 function updateEditorState() {
     const codeText = document.getElementById('code');
-    const linesText = document.getElementById('lines');
-    const cursorPos = document.getElementById('cursorPos');
 
-    // Mueve el cursor al inicio
     codeText.selectionStart = 0;
     codeText.selectionEnd = 0;
 
-    // Actualiza el textarea de líneas
     updateLines();
-
-    // Actualiza la posición del cursor
     updateCursorPosition();
 }
 
@@ -194,141 +188,3 @@ function updateCursorPosition() {
     const currentColumn = linesUntilCursor[linesUntilCursor.length - 1].length;
     document.getElementById('cursorPos').textContent = `Línea: ${currentLine}, Columna: ${currentColumn}`;
 }
-
-
-
-/* document.getElementById('btnNewFile').addEventListener('click', createNewFile);
-document.getElementById('btnLoadFile').addEventListener('click', loadFile);
-document.getElementById('code').addEventListener('input', markUnsaved);
-
-let files = {}; // Almacenar el contenido de cada archivo
-let currentTab = null;
-
-window.onload = () => {
-    // Crear una pestaña y archivo por defecto
-    createTab('default.txt');
-    selectTab('default.txt');
-};
-
-function createNewFile() {
-    const fileName = prompt('Enter new file name:');
-    if (fileName) {
-        createTab(fileName);
-        selectTab(fileName);
-    }
-}
-
-function loadFile() {
-    const fileName = prompt('Enter existing file name:');
-    if (fileName) {
-        createTab(fileName);
-        selectTab(fileName);
-        // Aquí podrías agregar la lógica para cargar el contenido del archivo desde el servidor o el sistema de archivos
-        // Ejemplo: files[fileName] = "Contenido del archivo cargado";
-    }
-}
-
-function createTab(fileName) {
-    if (files[fileName]) return; // No crear pestaña si ya existe
-
-    const tab = document.createElement('div');
-    tab.className = 'tab';
-    tab.setAttribute('data-file-name', fileName);
-    tab.textContent = fileName;
-
-    const closeBtn = document.createElement('span');
-    closeBtn.className = 'close';
-    closeBtn.textContent = 'X';
-    closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Evita que el click en el botón de cierre active la pestaña
-        closeTab(fileName);
-    });
-
-    tab.appendChild(closeBtn);
-    tab.addEventListener('click', () => selectTab(fileName));
-
-    document.getElementById('tabsContainer').appendChild(tab);
-
-    files[fileName] = ''; // Inicializar contenido del archivo
-}
-
-function selectTab(fileName) {
-    if (currentTab) {
-        const activeTab = document.querySelector('.tab.active');
-        if (activeTab) {
-            activeTab.classList.remove('active');
-        }
-        files[currentTab] = document.getElementById('code').value;
-    }
-
-    currentTab = fileName;
-
-    // Encuentra la pestaña correspondiente y actívala
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
-        if (tab.getAttribute('data-file-name') === fileName) {
-            tab.classList.add('active');
-            document.getElementById('code').value = files[fileName];
-        }
-    });
-
-    // Si no se encuentra la pestaña, limpiar el textarea de código
-    if (!document.querySelector('.tab.active')) {
-        document.getElementById('code').value = '';
-    }
-    updateEditorState();
-}
-
-function closeTab(fileName) {
-    if (currentTab === fileName) {
-        const tabs = document.querySelectorAll('.tab');
-        const nextTab = Array.from(tabs).find(tab => tab.getAttribute('data-file-name') !== fileName);
-        if (nextTab) {
-            selectTab(nextTab.getAttribute('data-file-name'));
-        } else {
-            currentTab = null;
-            document.getElementById('code').value = '';
-        }
-    }
-
-    delete files[fileName];
-
-    // Encuentra la pestaña correspondiente y elimínala
-    const tabToRemove = document.querySelector(`.tab[data-file-name='${fileName}']`);
-    if (tabToRemove) {
-        tabToRemove.remove();
-    }
-
-    // Seleccionar la primera pestaña si no hay ninguna seleccionada
-    if (!currentTab && Object.keys(files).length > 0) {
-        const firstFileName = Object.keys(files)[0];
-        selectTab(firstFileName);
-    }
-}
-
-function markUnsaved() {
-    if (currentTab) {
-        const tabs = document.querySelectorAll('.tab');
-        tabs.forEach(tab => {
-            if (tab.getAttribute('data-file-name') === currentTab && !tab.classList.contains('unsaved')) {
-                tab.classList.add('unsaved');
-            }
-        });
-    }
-}
-
-function updateEditorState() {
-    const codeText = document.getElementById('code');
-    const linesText = document.getElementById('lines');
-    const cursorPos = document.getElementById('cursorPos');
-
-    // Mueve el cursor al inicio
-    codeText.selectionStart = 0;
-    codeText.selectionEnd = 0;
-
-    // Actualiza el textarea de líneas
-    updateLines();
-
-    // Actualiza la posición del cursor
-    updateCursorPosition();
-} */
