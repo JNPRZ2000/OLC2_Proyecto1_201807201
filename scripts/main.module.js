@@ -19,6 +19,7 @@ document.getElementById('btnRun').addEventListener('click', () => {
         const visitor = new Visitor(st);
         const ast = parse(code.trim());
         visitor.visit(ast);
+        
         console.log("Errores"+JSON.stringify(visitor.semanticErrors, null, 2));
         code += `\nERRORES${JSON.stringify(visitor.semanticErrors, null, 2)}`;
 
