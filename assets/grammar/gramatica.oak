@@ -1,0 +1,265 @@
+Program = _ inst:Instructions* _
+
+Instructions
+    = _ s:(Assignment 
+    / Declaration
+    / StructDeclaration
+    / FunctionDeclaration
+    / Break
+    / Continue
+    / Return
+    / Sout
+    / For
+    / If
+    / While
+    / Switch) _
+
+Sout = SOUT _ "(" _ e:Expression tail:(_","_ Expression)* _ ")" _ ";"
+
+Case = CASE _ op:Expression _ ":" _ i:Instructions+
+
+Default = DEFAULT _ ":" _ i:Instructions+
+
+ElseIf = ELSE _ IF _ "(" c:Expression ")" _ "{" _ i:Instructions* _ "}"
+
+Else = ELSE _ "{" _ i:Instructions* _ "}"
+
+For = FOR _ "(" _ i:(Declaration / Assignment) _  c:Expression _ ";" _ u:(Increment/Decrement)")" _ "{" _ ins:Instructions* _ "}"
+
+While = WHILE _ "(" _ c:Expression _ ")" _ "{" _ i:Instructions* _ "}"
+
+Switch = SWITCH _ "(" _ c:Expression _ ")" _ "{" _ cs:Case+ _ d:Default? _ "}"
+
+If = IF _ "(" _ c:Expression _ ")" _ "{" _ i:Instructions* _ "}" _ ei:ElseIf* _ e:Else ?
+
+Break = BREAK _ ";"
+
+Continue = CONTINUE _ ";"
+
+Return = RETURN _ Expression? _ ";" 
+
+Rows
+    = _ "{"_ Rows ( _ "," _ Rows)* _ "}"
+    /  Expression ( _ "," _ Expression)*
+
+Params = DataType _ ("["_ Expression _"]")* _ Id (_ "," _ DataType _ ("["_ Expression _ "]")* _ Id)*
+
+VarDeclaration = VAR _ i:Id _ "=" _ e:Expression _ ";"
+
+TypedDeclaration
+    = d:DataType _ i:Id _ "=" _ e:Expression _ ";"
+    / d:DataType _ i:Id _ ";"
+
+ArrayDeclaration
+    = DataType _ ("["_"]")+ _ Id _ "=" _ NEW _ DataType _ ("["_ Expression _"]")+ _ ";"
+    / DataType _ ("["_"]")+ _ Id _ "=" _ "{" _ Rows (_ "," _ Rows)* _ "}" _ ";"
+    / DataType _ ("["_"]")+ _ Id _ "=" _ IdNoMod _ ";"
+
+FunctionDeclaration = ((DataType ("["_"]")*) / VOID) _ Id _ "(" Params* _ ")" _ "{"_ Instructions* _ "}"
+
+StructDeclaration
+    = STRUCT _ Id _ "{" _ Declaration+ _"}"
+
+StructInstance = Id _ Id _ "=" _ StructInit _ ";"
+
+StructVal = StructInit / Expression
+
+StructParam = Id _ ":" _ StructVal
+
+StructInit = Id _ "{" _ StructParam ( _ "," _ StructParam)* _ "}"
+
+Declaration
+    = _ d:(VarDeclaration
+    / StructInstance
+    / TypedDeclaration
+    / ArrayDeclaration) _
+
+Decrement
+    = i:Ids _ "-=" _ e:Expression
+    / i:Ids _ "--"
+
+Increment
+    = i:Ids _ "+=" _ e:Expression
+    / i:Ids _ "++"
+
+AdditionAssign = i:Increment _ ";"
+
+SubsAssign = d:Decrement _ ";"
+
+Assignment
+    = AdditionAssign
+    / SubsAssign
+    / i:Ids _ "=" _ e:Expression _ ";"
+
+Expression = TernaryExpression
+
+TernaryExpression
+    = c:LogicalExpression _ "?" _ t:LogicalExpression _ ":" _ f:LogicalExpression
+    / LogicalExpression
+
+LogicalExpression = left:OrExpression tail:( _ operator:("&&" / "||") _  right:OrExpression)*
+
+OrExpression = left:NotExpression tail:( _ operator:"||" _ right:NotExpression)*
+
+NotExpression
+    = "!" _ c:ComparisonExpression
+    / ComparisonExpression
+
+ComparisonExpression = left:RelationalExpression tail:(_ operator:("=="/"!=") _ right:RelationalExpression)*
+
+RelationalExpression = left:AdditionExpression tail:( _ operator:(">="/"<="/">"/"<") _ right:AdditionExpression)*
+
+AdditionExpression = left:MultiplicationExpression tail:( _ operator:("+"/"-") _ right:MultiplicationExpression)*
+
+MultiplicationExpression = left:UnaryExpression tail:( _ operator:("*"/"/"/"%") _ right:UnaryExpression)*
+
+UnaryExpression
+    = "-" _ e:UnaryExpression
+    / "+" _ e:UnaryExpression
+    / v:Value
+
+StrVal = "\"" s:[^\"]* "\""
+
+CharVal = "'" c:[^'] "'"
+
+BoolVal = TRUE / FALSE
+
+NumVal
+    = [0-9]*'.'[0-9]+
+    / [0-9]+
+
+ParamValues
+    = Expression ( _ "," _ Expression)*
+
+ObjectKeys = OBJKYS _ "(" _ Expression _ ")"
+
+ParseFloat = PARSEFLOAT _ "("_ Expression _ ")"
+
+ParseInt = PARSEINT _ "(" _ Expression _ ")"
+
+ToLowerCase = TOLOWERCASE _ "(" _ Expression _ ")"
+
+ToString = TOSTRING _ "(" _ Expression _ ")"
+
+ToUpperCase = TOUPPERCASE _ "(" _ Expression _ ")"
+
+TypeOf = TYPEOF  _ Expression
+
+IndexOf = IdNoMod"."INDEXOF _ "(" _ Expression _ ")"
+
+Join = IdNoMod"."JOIN _ "(" _ ")"
+
+Length = IdNoMod"."LENGTH
+
+Value
+    = "(" _ e:Expression _ ")"
+    / s:StrVal
+    / c:CharVal
+    / b:BoolVal
+    / n:NumVal
+    / NULL
+    / i:IdNoMod 
+
+Id
+    = r:Reserved? [a-zA-Z_][a-zA-Z0-9_]*
+
+IdArray
+    = i:Id _ d:("["_ Expression _ "]")+ 
+
+IdFunction
+    = i:Id".(" _ p:ParamValues * _ ")"
+
+IdStruct
+    = s:Id"."k:Id
+
+Ids
+    = i:(IdArray
+    / IdStruct
+    / Id)
+
+IdNoMod
+    = i:(Ids
+    / IdFunction)
+
+DataType
+    = dt:(INT
+    / FLOAT
+    / STRING
+    / CHAR
+    / BOOLEAN
+    / Id)
+
+BOOLEAN = "boolean"
+BREAK = "break"
+CASE = "case"
+CHAR = "char"
+CONTINUE = "continue"
+DEFAULT = "default"
+ELSE = "else"
+FALSE = "false"
+FLOAT = "float"
+FOR = "for"
+IF = "if"
+INDEXOF = "indexOf"
+INT = "int"
+JOIN = "join"
+LENGTH = "length"
+NEW = "new"
+NULL = "null"
+OBJKYS = "Object.keys"
+PARSEFLOAT = "parsefloat"
+PARSEINT = "parseInt"
+RETURN = "return"
+STRING = "string"
+STRUCT = "struct"
+SOUT = "System.out.println"
+SWITCH = "switch"
+TOLOWERCASE = "toLowerCase"
+TOSTRING = "toString"
+TOUPPERCASE = "toUpperCase"
+TRUE = "true"
+TYPEOF = "typeof"
+VAR = "var"
+VOID = "void"
+WHILE = "while"
+
+Reserved
+    = BOOLEAN
+    / BREAK
+    / CASE
+    / CHAR
+    / CONTINUE
+    / DEFAULT
+    / ELSE
+    / FALSE
+    / FLOAT
+    / FOR
+    / IF
+    / INDEXOF
+    / INT
+    / JOIN
+    / LENGTH
+    / NEW
+    / NULL
+    / OBJKYS
+    / PARSEFLOAT
+    / PARSEINT
+    / RETURN
+    / STRING
+    / STRUCT
+    / SOUT
+    / SWITCH
+    / TOLOWERCASE
+    / TOSTRING
+    / TOUPPERCASE
+    / TRUE
+    / TYPEOF
+    / VAR
+    / VOID
+    / WHILE
+
+_ = (WS / Comment)*
+WS = [ \t\n\r\f]+
+Comment = Block / Line
+Block = "/*"(!"*/" .)*"*/"
+Line = "//" [^\n]*
