@@ -17,8 +17,13 @@ Instructions
     / Switch) _ {
         return s;
     }
-Sout = SOUT _ "(" _ e:Expression _ ")" _ ";"{
-        return { type: "Sout", expression:e };
+Sout = SOUT _ "(" _ e:Expression tail:(_","_ Expression)* _ ")" _ ";"{
+        let exps = []
+        exps.push(e);
+        for(let i = 0; i < tail.length; i++){
+            exps.push(tail[i][3])
+        }
+        return { type: "Sout", expressions:exps };
     }
 //SENTENCES
     Case = CASE _ op:Expression _ ":" _ i:Instructions+{
@@ -28,7 +33,12 @@ Sout = SOUT _ "(" _ e:Expression _ ")" _ ";"{
             instructions: i
         };
     }
-    Default = DEFAULT _ ":" _ Instructions+
+    Default = DEFAULT _ ":" _ i:Instructions+{
+        return {
+            type: "Default",
+            instructions: i
+        }
+    }
     ElseIf = ELSE _ IF _ "(" c:Expression ")" _ "{" _ i:Instructions* _ "}"{
         return{
             type: "ElseIf",
@@ -42,7 +52,15 @@ Sout = SOUT _ "(" _ e:Expression _ ")" _ ";"{
             instructions: i
         }
     }
-For = FOR _ "(" _ i:(Declaration / Assignment) _  Expression _ ";" _ (Increment/Decrement)")" _ "{" _ Instructions* _ "}"
+For = FOR _ "(" _ i:(Declaration / Assignment) _  c:Expression _ ";" _ u:(Increment/Decrement)")" _ "{" _ ins:Instructions* _ "}"{
+    return{
+        type: "For",
+        init: i,
+        condition: c,
+        update: u,
+        instructions: ins
+    }
+}
 While = WHILE _ "(" _ c:Expression _ ")" _ "{" _ i:Instructions* _ "}"{
     return {
         type: "While",
@@ -64,7 +82,7 @@ If = IF _ "(" _ c:Expression _ ")" _ "{" _ i:Instructions* _ "}" _ ei:ElseIf* _ 
         condition: c,
         instructions: i,
         elseIf: ei.length > 0 ? ei : null,
-        elsState: e !== null ? e : null 
+        elseState: e !== null ? e : null 
     };
 }
 
@@ -93,7 +111,13 @@ TypedDeclaration
             expression: e
         };
     }
-    / DataType _ Id _ ";"
+    / d:DataType _ i:Id _ ";"{
+        return{
+            type: "TypedDeclaration2",
+            dataType: d,
+            id: i
+        };
+    }
 ArrayDeclaration
     = DataType _ ("["_"]")+ _ Id _ "=" _ NEW _ DataType _ ("["_ Expression _"]")+ _ ";"
     / DataType _ ("["_"]")+ _ Id _ "=" _ "{" _ Rows (_ "," _ Rows)* _ "}" _ ";"
@@ -230,15 +254,14 @@ MultiplicationExpression = left:UnaryExpression tail:( _ operator:("*"/"/"/"%") 
 UnaryExpression
     = "-" _ e:UnaryExpression { return { type:"Unary", op: "-", exp: e}; }
     / "+" _ e:UnaryExpression { return { type:"Unary", op: "+", exp: e}; }
-    / "!" _ e:UnaryExpression { return { type:"Unary", op: "!", exp: e}; }
     / v:Value { return v;}
 //VALUES
-StrVal = "\"" s:[^\"]* "\"" { return { type: "StrVal", value: s }; }
+StrVal = "\"" s:[^\"]* "\"" { return { type: "StrVal", value: s.join('') }; }
 CharVal = "'" c:[^'] "'" { return { type: "CharVal", value: c }; }
 BoolVal = TRUE { return { type:"BoolVal", value: true }; } / FALSE { return { type:"BoolVal", value: false }; } 
 NumVal
-    = [0-9]?'.'[0-9]+ { return { type: "NumVal", value:{ type: "f", val: parseInt(text()) } }; }
-    / [0-9]+ { return {type:"NumVal", value: { type:"i", val: parseInt(text()) } }; }
+    = [0-9]*'.'[0-9]+ { return { type: "NumVal", value:{ type: "float", val: text() } }; }
+    / [0-9]+ { return {type:"NumVal", value: { type:"int", val: text() } }; }
 ParamValues
     = Expression ( _ "," _ Expression)*
     // SYSTEM FUNCTIONS

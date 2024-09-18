@@ -23,7 +23,7 @@ function createNewFile() {
 function loadFile() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.txt'; // Ajusta esto según el tipo de archivo que permitas
+    input.accept = '.oak'; // Ajusta esto según el tipo de archivo que permitas
 
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];

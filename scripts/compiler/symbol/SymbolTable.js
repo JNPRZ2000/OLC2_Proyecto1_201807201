@@ -33,4 +33,7 @@ export default class SymbolTable {
             throw new Error(`Identifier ${id} already declared in this scope.`);
         }
     }
+    createChildScope(){
+        return new SymbolTable(this);
+    }
 }

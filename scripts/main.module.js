@@ -13,13 +13,15 @@ document.getElementById('btnRun').addEventListener('click', () => {
     // Formatear la fecha y hora como una cadena
     const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     document.getElementById('console').value = formattedDate + "\n";
-    const code = document.getElementById('code').value;
+    let code = document.getElementById('code').value;
     try {
         const st = new SymbolTable();
         const visitor = new Visitor(st);
         const ast = parse(code.trim());
         visitor.visit(ast);
-        
+        console.log("Errores"+JSON.stringify(visitor.semanticErrors, null, 2));
+        code += `\nERRORES${JSON.stringify(visitor.semanticErrors, null, 2)}`;
+
         /*const tree = parse(code.trim(), {
             StartRules: ["Program"]
         });
@@ -41,7 +43,7 @@ document.getElementById('btnRun').addEventListener('click', () => {
         err += `\tCause: ${code.split('\n')[line - 1]?.[column - 1] || 'unknown'}\n`;
         err += `\tContext: ${code.split('\n')[line - 1]}\n}`;
         document.getElementById("console").value += err;
-        console.error("Error cmd",e);
+        console.error("Error cmd", e);
     }
 });
 

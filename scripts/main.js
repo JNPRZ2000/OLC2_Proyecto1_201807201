@@ -30,7 +30,19 @@ codeText.addEventListener('scroll', () => {
 });
 
 codeText.addEventListener('keyup', () => { updateCursorPosition(); });
-codeText.addEventListener('keydown', () => { updateCursorPosition(); });
+codeText.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = codeText.selectionStart;
+        const end = codeText.selectionEnd;
+        codeText.value = codeText.value.substring(0, start) + "   " + codeText.value.substring(end);
+        codeText.selectionStart = codeText.selectionEnd = start + 3;
+        updateCursorPosition();
+        updateLines();
+    } else {
+        updateCursorPosition();
+    }
+});
 codeText.addEventListener('click', () => { updateCursorPosition(); });
 
 updateLines();
